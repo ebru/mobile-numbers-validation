@@ -4,8 +4,9 @@ namespace App\Imports;
 
 use App\Number;
 use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class NumbersFileImport implements ToModel
+class NumbersFileImport implements ToModel, WithHeadingRow
 {
     /**
     * @param array $row
@@ -15,8 +16,8 @@ class NumbersFileImport implements ToModel
     public function model(array $row)
     {
         return new Number([
-            'number_id'     => $row[0],
-            'number_value'    => $row[1]
+            'number_id' => $row['id'],
+            'number_value' => $row['sms_phone']
          ]);
     }
 }
