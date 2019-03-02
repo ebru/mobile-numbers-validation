@@ -28,6 +28,11 @@ class NumbersFileController extends Controller
             
             $array = Excel::toArray(new NumbersFileImport, request()->file('numbers_file'));
 
+            $isValidNumber = $this->validateNumber('27831234567');
+
+            var_dump($isValidNumber);
+            exit;
+
             $response = [
                 'file' => [
                     'original_path' => $originalPath,
@@ -54,5 +59,14 @@ class NumbersFileController extends Controller
         $hash = $this->hashName ?: $this->hashName = Str::random(40);
 
         return $path.$hash.'.'.$this->guessExtension();
+    }
+
+    public function validateNumber(string $number): bool
+    {
+        if (preg_match('/^(\+?27|0)[6-8][0-9]{8}$/', $number) === 1) {
+            return true;
+        }
+
+        return false;
     }
 }
