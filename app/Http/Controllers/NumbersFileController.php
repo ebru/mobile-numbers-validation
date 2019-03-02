@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Imports\NumbersFileImport;
 use Maatwebsite\Excel\Facades\Excel;
+use Storage;
 
 class NumbersFileController extends Controller
 {
@@ -13,12 +16,45 @@ class NumbersFileController extends Controller
     {
         if ($request->hasFile('numbers_file')) {
         
+            // Database import
+            // Excel::import(new NumbersFileImport, request()->file('numbers_file'));
+
+            $extension = $request->file('numbers_file')->getClientOriginalExtension();
+            $fileName = uniqid().'.'.$extension; 
+
+            Storage::disk('public')->putFileAs('files/original', $request->file('numbers_file'), $fileName);
+
+            $originalPath = Storage::url("files/original/{$fileName}");
+            
             $array = Excel::toArray(new NumbersFileImport, request()->file('numbers_file'));
 
-            var_dump($array); exit;
+            $response = [
+                'file' => [
+                    'original_path' => $originalPath,
+                    'data' => $array
+                ]
+            ];
 
-            return response()->json('OK')
+            return response()->json($response)
                 ->setStatusCode(Response::HTTP_OK);
         }
+    }
+
+    public function putFile($path, $file, $options = [])
+    {
+        return $this->putFileAs($path, $file, $file->hashName(), $options);
+        // note the 3rd param:  $file->hashName()
+    }
+
+    public function hashName($path = null)
+    {
+        if ($path) {
+            $path = rtrim($path, '/').'/';
+        }
+
+        $hash = $this->hashName ?: $this->hashName = Str::random(40);
+
+        return $path.$hash.'.'.$this->guessExtension();
+        // $this->guessExtension()...... this is what returns .txt  on your text file
     }
 }
