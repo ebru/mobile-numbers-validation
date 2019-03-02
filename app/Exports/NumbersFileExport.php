@@ -5,8 +5,9 @@ namespace App\Exports;
 use App\Number;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 
-class NumbersFileExport implements FromCollection, WithHeadings	
+class NumbersFileExport implements FromCollection, WithHeadings, WithStrictNullComparison
 {
     /**
     * @return \Illuminate\Support\Collection
