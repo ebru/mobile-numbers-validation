@@ -18,7 +18,8 @@ class NumbersFileController extends Controller
     {
         if ($request->hasFile('numbers_file')) {
             $extension = $request->file('numbers_file')->getClientOriginalExtension();
-            $fileName = uniqid().'.'.$extension;
+            $fileId = uniqid();
+            $fileName = $fileId.'.'.$extension;
 
             Storage::disk('public')->putFileAs('files/original', $request->file('numbers_file'), $fileName);
 
@@ -49,6 +50,7 @@ class NumbersFileController extends Controller
 
             $response = [
                 'file' => [
+                    'id' => $fileId,
                     'original_path' => $originalPath,
                     'modified_path' => $modifiedPath,
                     'details' => [
