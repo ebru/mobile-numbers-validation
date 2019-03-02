@@ -14,3 +14,7 @@ use Illuminate\Http\Request;
 */
 
 Route::post('register', 'PassportController@register');
+
+Route::middleware('auth:api')->group(function () {
+    Route::post('mobile-numbers', 'NumbersFileController@process');
+});
