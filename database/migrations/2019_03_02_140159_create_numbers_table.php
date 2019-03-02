@@ -14,8 +14,7 @@ class CreateNumbersTable extends Migration
     public function up()
     {
         Schema::create('numbers', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->string('number_id');
+            $table->string('number_id')->unique();
             $table->string('number_value');
             $table->timestamps();
         });
