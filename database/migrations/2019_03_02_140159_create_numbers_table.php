@@ -16,6 +16,8 @@ class CreateNumbersTable extends Migration
         Schema::create('numbers', function (Blueprint $table) {
             $table->string('number_id')->unique();
             $table->string('number_value');
+            $table->boolean('is_valid');
+            $table->boolean('is_modified');
             $table->timestamps();
         });
     }
