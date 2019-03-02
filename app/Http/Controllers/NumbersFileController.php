@@ -30,17 +30,21 @@ class NumbersFileController extends Controller
             $array = Excel::toArray(new NumbersFileImport, request()->file('numbers_file'));
 
             foreach ($array[0] as $row) {
-                if ($this->validateNumber((string) $row['sms_phone'])) {
-                    $number = new Number();
+                $number = new Number();
 
-                    $number->number_id = $row['id'];
-                    $number->number_value = $row['sms_phone'];
+                $number->number_id = $row['id'];
+                $number->number_value = $row['sms_phone'];
+                    
+                if ($this->validateNumber((string) $row['sms_phone'])) {
                     $number->is_valid = true;
                     $number->is_modified = false;
-
-                    $number->save();
+                } else {
+                    $number->is_valid = false;
+                    $number->is_modified = false;
                 }
-            } 
+
+                $number->save();
+            }
 
             $response = [
                 'file' => [
