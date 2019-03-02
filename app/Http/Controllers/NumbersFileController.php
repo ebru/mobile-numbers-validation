@@ -36,6 +36,7 @@ class NumbersFileController extends Controller
                     $number->number_id = $row['id'];
                     $number->number_value = $row['sms_phone'];
                     $number->is_valid = true;
+                    $number->is_modified = false;
 
                     $number->save();
                 }
