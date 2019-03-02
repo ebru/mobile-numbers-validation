@@ -20,7 +20,7 @@ class NumbersFileController extends Controller
             // Excel::import(new NumbersFileImport, request()->file('numbers_file'));
 
             $extension = $request->file('numbers_file')->getClientOriginalExtension();
-            $fileName = uniqid().'.'.$extension; 
+            $fileName = uniqid().'.'.$extension;
 
             Storage::disk('public')->putFileAs('files/original', $request->file('numbers_file'), $fileName);
 
@@ -43,7 +43,6 @@ class NumbersFileController extends Controller
     public function putFile($path, $file, $options = [])
     {
         return $this->putFileAs($path, $file, $file->hashName(), $options);
-        // note the 3rd param:  $file->hashName()
     }
 
     public function hashName($path = null)
@@ -55,6 +54,5 @@ class NumbersFileController extends Controller
         $hash = $this->hashName ?: $this->hashName = Str::random(40);
 
         return $path.$hash.'.'.$this->guessExtension();
-        // $this->guessExtension()...... this is what returns .txt  on your text file
     }
 }
