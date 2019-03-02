@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Imports\NumbersFileImport;
+use App\Number;
 use Maatwebsite\Excel\Facades\Excel;
 use Storage;
 
@@ -28,10 +29,17 @@ class NumbersFileController extends Controller
             
             $array = Excel::toArray(new NumbersFileImport, request()->file('numbers_file'));
 
-            $isValidNumber = $this->validateNumber('27831234567');
+            foreach ($array[0] as $row) {
+                if ($this->validateNumber((string) $row['sms_phone'])) {
+                    $number = new Number();
 
-            var_dump($isValidNumber);
-            exit;
+                    $number->number_id = $row['id'];
+                    $number->number_value = $row['sms_phone'];
+                    $number->is_valid = true;
+
+                    $number->save();
+                }
+            } 
 
             $response = [
                 'file' => [
