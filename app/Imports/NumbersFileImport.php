@@ -20,4 +20,14 @@ class NumbersFileImport implements ToModel, WithHeadingRow
             'number_value' => $row['sms_phone']
          ]);
     }
+
+    public function batchSize(): int
+    {
+        return 500;
+    }
+    
+    public function chunkSize(): int
+    {
+        return 500;
+    }
 }
