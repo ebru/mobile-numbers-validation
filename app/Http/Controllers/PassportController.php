@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\User;
+use Validator;
 
 class PassportController extends Controller
 {
@@ -18,11 +19,19 @@ class PassportController extends Controller
      */
     public function register(Request $request)
     {
-        $this->validate($request, [
-            'name' => 'required|min:3',
+        $rules = [
+            'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
-        ]);
+        ];
+    
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return [
+                'error' => $validator->errors()->first()
+            ];
+        }
  
         $user = User::create([
             'name' => $request->name,
@@ -30,7 +39,7 @@ class PassportController extends Controller
             'password' => bcrypt($request->password)
         ]);
  
-        $token = $user->createToken('image-manipulation')->accessToken;
+        $token = $user->createToken('mobile-numbers-validation')->accessToken;
  
         return response()->json(['token' => $token])
             ->setStatusCode(Response::HTTP_OK);
