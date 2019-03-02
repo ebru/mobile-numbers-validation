@@ -36,6 +36,13 @@ class NumbersFileController extends Controller
                 if ($this->validateNumber((string) $row['sms_phone'])) {
                     $number->is_valid = true;
                     $number->is_modified = false;
+                } elseif ($this->correctNumber((string) $row['sms_phone'])['is_corrected']) {
+                    $modifiedDetails = $this->correctNumber((string) $row['sms_phone']);
+
+                    $number->number_value = $modifiedDetails['modified_number'];
+                    $number->is_valid = true;
+                    $number->is_modified = true;
+                    $number->before_modified_value = $row['sms_phone'];
                 } else {
                     $number->is_valid = false;
                     $number->is_modified = false;
@@ -68,6 +75,34 @@ class NumbersFileController extends Controller
         }
     }
 
+    public function correctNumber(string $number): array
+    {
+        $isCorrected = false;
+        $modifiedNumber = null;
+
+        if (strlen($number) === 9) {
+            $addedCountryCodeNumber = '27'.$number;
+            if($this->validateNumber($addedCountryCodeNumber)) {
+                $isCorrected = true;
+                $modifiedNumber = $addedCountryCodeNumber;
+            }
+        }
+
+        return [
+            'is_corrected' => $isCorrected,
+            'modified_number' => $modifiedNumber
+        ];
+    }
+
+    public function validateNumber(string $number): bool
+    {
+        if (preg_match('/^(\+?27|0)[6-8][0-9]{8}$/', $number) === 1) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function putFile($path, $file, $options = [])
     {
         return $this->putFileAs($path, $file, $file->hashName(), $options);
@@ -82,14 +117,5 @@ class NumbersFileController extends Controller
         $hash = $this->hashName ?: $this->hashName = Str::random(40);
 
         return $path.$hash.'.'.$this->guessExtension();
-    }
-
-    public function validateNumber(string $number): bool
-    {
-        if (preg_match('/^(\+?27|0)[6-8][0-9]{8}$/', $number) === 1) {
-            return true;
-        }
-
-        return false;
     }
 }
