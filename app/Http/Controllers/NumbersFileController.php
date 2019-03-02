@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Imports\NumbersFileImport;
+use App\Exports\NumbersFileExport;
 use App\Number;
 use Maatwebsite\Excel\Facades\Excel;
 use Storage;
@@ -16,10 +17,6 @@ class NumbersFileController extends Controller
     public function process(Request $request)
     {
         if ($request->hasFile('numbers_file')) {
-        
-            // Database import
-            // Excel::import(new NumbersFileImport, request()->file('numbers_file'));
-
             $extension = $request->file('numbers_file')->getClientOriginalExtension();
             $fileName = uniqid().'.'.$extension;
 
@@ -45,10 +42,15 @@ class NumbersFileController extends Controller
 
                 $number->save();
             }
+            
+            Excel::store(new NumbersFileExport(), "files/modified/{$fileName}", 'public');
+
+            $modifiedPath = Storage::url("files/modified/{$fileName}");
 
             $response = [
                 'file' => [
                     'original_path' => $originalPath,
+                    'modified_path' => $modifiedPath,
                     'data' => $array
                 ]
             ];
