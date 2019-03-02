@@ -51,7 +51,13 @@ class NumbersFileController extends Controller
                 'file' => [
                     'original_path' => $originalPath,
                     'modified_path' => $modifiedPath,
-                    'data' => $array
+                    'details' => [
+                        'count' => [
+                            'total_numbers' => 'test',
+                            'valid_numbers' => 'test',
+                            'not_valid_numbers' => 'test'
+                        ]
+                    ]
                 ]
             ];
 
