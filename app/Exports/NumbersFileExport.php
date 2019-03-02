@@ -24,6 +24,7 @@ class NumbersFileExport implements FromCollection, WithHeadings, WithStrictNullC
             'number_value',
             'is_valid',
             'is_modified',
+            'before_modified_value',
             'created_at',
             'updated_at'
         ];

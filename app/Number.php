@@ -12,6 +12,6 @@ class Number extends Model
      * @var array
      */
     protected $fillable = [
-        'number_id', 'number_value', 'is_valid', 'is_modified',
+        'number_id', 'number_value', 'is_valid', 'is_modified', 'before_modified_value',
     ];
 }

@@ -14,10 +14,11 @@ class CreateNumbersTable extends Migration
     public function up()
     {
         Schema::create('numbers', function (Blueprint $table) {
-            $table->string('number_id')->unique();
+            $table->integer('number_id')->unique();
             $table->string('number_value');
             $table->boolean('is_valid');
             $table->boolean('is_modified');
+            $table->string('before_modified_value')->nullable();
             $table->timestamps();
         });
     }
