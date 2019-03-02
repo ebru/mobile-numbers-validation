@@ -82,10 +82,17 @@ class NumbersFileController extends Controller
 
         if (strlen($number) === 9) {
             $addedCountryCodeNumber = '27'.$number;
-            if($this->validateNumber($addedCountryCodeNumber)) {
+            if ($this->validateNumber($addedCountryCodeNumber)) {
                 $isCorrected = true;
                 $modifiedNumber = $addedCountryCodeNumber;
             }
+        }
+
+        if ($this->validateNumber(explode("_", $number)[0])) {
+            $updatedNumber = explode("_", $number)[0];
+            
+            $isCorrected = true;
+            $modifiedNumber = $updatedNumber;
         }
 
         return [
