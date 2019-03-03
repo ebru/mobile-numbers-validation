@@ -51,3 +51,186 @@ php artisan serve
 ```
 
 ...and you're all done! You have started the server on http://localhost:8000
+
+## Sending Requests
+You can send POST requests using tools like **Postman.** 
+With the link below, you can directly import a test environment with endpoints provided.
+
+`https://www.getpostman.com/collections/544b84d18057569e1d0e`
+
+**Base URL:**
+http://localhost:8000/api
+
+## **1. create api token**
+Returns an api token to send authenticated requests while registering the user.
+
+**Reguest**
+
+| Method  | URL            |
+| --------|----------------|
+| POST    | /register      |
+
+| Type    | Params                 | Values        |
+| --------|------------------------|---------------|
+| POST    | name                   | String        |
+| POST    | email                  | String        |
+| POST    | password               | String        |
+
+**Response**
+
+```
+{
+    "token": "<api_token>"
+}
+```
+
+## **2. validate numbers from a file**
+Returns the validation details of numbers from file uploaded.
+
+**Reguest**
+
+| Method  | URL            |
+| --------|----------------|
+| POST    | /files         |
+
+| Header         | Value                  |
+| ---------------|------------------------|
+| Accept         | application/json       |
+| Authorization  | Bearer <api_token>     |
+
+| Type    | Params                 | Values        |
+| --------|------------------------|---------------|
+| POST    | numbers_file           | File          |
+
+* **numbers_file** is required.
+
+**Response**
+
+```
+{
+    "file": {
+        "id": 11,
+        "hash_name": "pJ3JdZFpYVA8CnMd8wMI2Ox2jXeUvJellABMurxv",
+        "original_path": "/storage/files/original/pJ3JdZFpYVA8CnMd8wMI2Ox2jXeUvJellABMurxv.csv",
+        "modified_path": "/storage/files/modified/pJ3JdZFpYVA8CnMd8wMI2Ox2jXeUvJellABMurxv.csv",
+        "details": {
+            "count": {
+                "total_numbers": 1000,
+                "valid_numbers": 531,
+                "corrected_numbers": 74,
+                "not_valid_numbers": 469
+            }
+        }
+    }
+}
+```
+
+## **3. get details of processed file by id**
+Returns the validation details of a processed file with id given.
+
+**Reguest**
+
+| Method  | URL                |
+| --------|--------------------|
+| GET     | /files/{file_id}   |
+
+| Header         | Value                  |
+| ---------------|------------------------|
+| Accept         | application/json       |
+| Authorization  | Bearer <api_token>     |
+
+* **file_id:** ID of the file you want the details of.
+
+**Response**
+
+```
+{
+    "file": {
+        "id": 11,
+        "hash_name": "pJ3JdZFpYVA8CnMd8wMI2Ox2jXeUvJellABMurxv",
+        "original_path": "/storage/files/original/pJ3JdZFpYVA8CnMd8wMI2Ox2jXeUvJellABMurxv.csv",
+        "modified_path": "/storage/files/modified/pJ3JdZFpYVA8CnMd8wMI2Ox2jXeUvJellABMurxv.csv",
+        "details": {
+            "count": {
+                "total_numbers": 1000,
+                "valid_numbers": 531,
+                "corrected_numbers": 74,
+                "not_valid_numbers": 469
+            }
+        }
+    }
+}
+```
+
+## **4. validate a single number**
+Returns the validation details of a single number.
+
+**Reguest**
+
+| Method  | URL            |
+| --------|----------------|
+| POST    | /numbers         |
+
+| Header         | Value                  |
+| ---------------|------------------------|
+| Accept         | application/json       |
+| Authorization  | Bearer <api_token>     |
+
+| Type    | Params                 | Values        |
+| --------|------------------------|---------------|
+| POST    | mobile_number          | String        |
+
+* **mobile_number** is required.
+
+**Response**
+
+```
+{
+   // valid & not modified value
+   {
+        "number": {
+            "value": "27831234567",
+            "details": {
+                "is_valid": true,
+                "is_modified": false,
+                "before_modified_value": null
+            }
+        }
+    }
+
+   // valid & modified value
+   {
+        "number": {
+            "value": "27831234567",
+            "details": {
+                "is_valid": true,
+                "is_modified": true,
+                "before_modified_value": "831234567"
+            }
+        }
+    }
+
+    {
+        "number": {
+            "value": "27831234567",
+            "details": {
+                "is_valid": true,
+                "is_modified": true,
+                "before_modified_value": "27831234567_DELETED"
+            }
+        }
+    }
+
+   // not valid value
+   {
+        "number": {
+            "value": "9983123456",
+            "details": {
+                "is_valid": false,
+                "is_modified": false,
+                "before_modified_value": null
+            }
+        }
+    }
+}
+```
