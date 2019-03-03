@@ -101,6 +101,19 @@ class NumbersFileController extends Controller
     }
 
     /**
+    * Get file from database with hash name
+    *
+    * @param string $fileHashName
+    * @return object
+    */
+    public function getFileByHashName(string $fileHashName): object
+    {
+        $file = DB::table('numbers_files')->where('file_hash_name', $fileHashName)->first();
+
+        return $file;
+    }
+
+    /**
      * Validates the number if it is formatted correctly for South America
      *
      * @param string $number
@@ -149,19 +162,6 @@ class NumbersFileController extends Controller
             'is_corrected' => false,
             'modified_number' => null
         ];
-    }
-
-    /**
-     * Get file from database with hash name
-     *
-     * @param string $fileHashName
-     * @return object
-     */
-    public function getFileByHashName(string $fileHashName): object
-    {
-        $file = DB::table('numbers_files')->where('file_hash_name', $fileHashName)->first();
-
-        return $file;
     }
 
     /**
