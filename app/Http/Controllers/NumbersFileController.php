@@ -36,12 +36,12 @@ class NumbersFileController extends Controller
         $parsedFileDetails = $this->parseFile($uploadedFile);
 
         foreach ($parsedFileDetails['numbers'] as $number) {
-            try {
-                $number->save();
-            } catch (\Exception $e) {
+            if ($this->getNumberById($number->number_id)) {
                 return response()->json(['error' => 'The file contains duplicated number ids.'])
                     ->setStatusCode(Response::HTTP_BAD_REQUEST);
             }
+
+            $number->save();
         }
 
         $originalPath = $this->saveUploadedFile($uploadedFile, $fileName, 'original');
@@ -128,12 +128,25 @@ class NumbersFileController extends Controller
     }
 
     /**
+     * Get number from database with number id
+     *
+     * @param float $numberId
+     * @return object|null
+     */
+    public function getNumberById(float $numberId)
+    {
+        $file = DB::table('numbers')->where('number_id', $numberId)->first();
+
+        return $file;
+    }
+
+    /**
     * Get file from database with hash name
     *
     * @param string $fileHashName
-    * @return object
+    * @return object|null
     */
-    public function getFileByHashName(string $fileHashName): object
+    public function getFileByHashName(string $fileHashName)
     {
         $file = DB::table('numbers_files')->where('file_hash_name', $fileHashName)->first();
 
