@@ -33,25 +33,26 @@ class NumbersFileController extends Controller
         $fileHashName = explode('.', $uploadedFile->hashName())[0];
         $fileName = $fileHashName.'.'.$extension;
             
-        $data = Excel::toArray(new NumbersFileImport, $uploadedFile);
+        $numbersArr = Excel::toArray(new NumbersFileImport, $uploadedFile)[0];
 
         $validNumbersCount = 0;
         $correctedNumbersCount = 0;
         $notValidNumbersCount = 0;
 
-        foreach ($data[0] as $row) {
+        foreach ($numbersArr as $row) {
             $number = new Number();
+            $numberStr = (string) $row['sms_phone'];
 
             $number->number_id = $row['id'];
             $number->number_value = $row['sms_phone'];
                     
-            if ($this->validateNumber((string) $row['sms_phone'])) {
+            if ($this->validateNumber($numberStr)) {
                 $number->is_valid = true;
                 $number->is_modified = false;
 
                 $validNumbersCount++;
-            } elseif ($this->correctNumber((string) $row['sms_phone'])['is_corrected']) {
-                $modifiedDetails = $this->correctNumber((string) $row['sms_phone']);
+            } elseif ($this->correctNumber($numberStr)['is_corrected']) {
+                $modifiedDetails = $this->correctNumber($numberStr);
 
                 $number->number_value = $modifiedDetails['modified_number'];
                 $number->is_valid = true;
@@ -83,22 +84,35 @@ class NumbersFileController extends Controller
         $numbersFile->file_hash_name = $fileHashName;
         $numbersFile->original_file_path = $originalPath;
         $numbersFile->modified_file_path = $modifiedPath;
-        $numbersFile->total_numbers_count = count($data[0]);
+        $numbersFile->total_numbers_count = count($numbersArr);
         $numbersFile->valid_numbers_count = $validNumbersCount;
         $numbersFile->corrected_numbers_count = $correctedNumbersCount;
         $numbersFile->not_valid_numbers_count = $notValidNumbersCount;
 
         try {
             $numbersFile->save();
-
-            $file = DB::table('numbers_files')->where('file_hash_name', $fileHashName)->first();
-            $numbersFile->file_id = $file->file_id;
+            $numbersFile->file_id = $this->getFileByHashName($fileHashName)->file_id;
 
             return new NumbersFileResource($numbersFile);
         } catch (\Exception $e) {
             return response()->json(['error' => 'The file process could not be saved in database.'])
                 ->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Validates the number if it is formatted correctly for South America
+     *
+     * @param string $number
+     * @return boolean
+     */
+    public function validateNumber(string $number): bool
+    {
+        if (preg_match('/^(\+?27|0)[6-8][0-9]{8}$/', $number) === 1) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -138,18 +152,16 @@ class NumbersFileController extends Controller
     }
 
     /**
-     * Validates the number if it is formatted correctly for South America
+     * Get file from database with hash name
      *
-     * @param string $number
-     * @return boolean
+     * @param string $fileHashName
+     * @return object
      */
-    public function validateNumber(string $number): bool
+    public function getFileByHashName(string $fileHashName): object
     {
-        if (preg_match('/^(\+?27|0)[6-8][0-9]{8}$/', $number) === 1) {
-            return true;
-        }
+        $file = DB::table('numbers_files')->where('file_hash_name', $fileHashName)->first();
 
-        return false;
+        return $file;
     }
 
     /**
