@@ -112,7 +112,7 @@ class NumbersFileController extends Controller
         }
 
         // Check if updated number is valid after eliminating the deleted part
-        $parsedUpdatedNumber = explode("_", $number)[0];
+        $parsedUpdatedNumber = explode("_DELETED", $number)[0];
 
         if ($this->validateNumber($parsedUpdatedNumber)) {
             return [
