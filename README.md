@@ -9,6 +9,8 @@ A REST API application validates South African mobile numbers from a CSV file. I
 - Laravel Excel 3.1 for processing CSV files
 - Laravel Passport for authentication
 
+![Scheme](public/assets/csv.jpg)
+
 ## Installation
 * Clone the repository and go to project directory.
 
@@ -60,6 +62,10 @@ With the link below, you can directly import a test environment with endpoints p
 
 **Base URL:**
 http://localhost:8000/api
+
+**Sample CSV File:**
+You can find a sample file contains some South African mobile numbers in path below.
+`/public/assets/sample_mobile_numbers.csv`
 
 ## **1. create api token**
 Returns an api token to send authenticated requests while registering the user.
@@ -197,7 +203,7 @@ Returns the validation details of a single number.
     }
 }
 
-// valid & modified value
+// valid & modified value with country code added
 {
     "number": {
         "value": "27831234567",
@@ -209,6 +215,7 @@ Returns the validation details of a single number.
     }
 }
 
+// valid & modified value parsed eliminating deleted part
 {
     "number": {
         "value": "27831234567",
