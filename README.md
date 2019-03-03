@@ -1,6 +1,6 @@
 # Mobile Numbers Validation
 
-A REST API application validates South African mobile numbers from a CSV file. It allows you to make POST requests to validate numbers and attempt to fix them if it is applicable. https://ebrukye.github.io/mobile-numbers-validation/
+A REST API application validates South African mobile numbers from a CSV file. It allows you to make POST requests to validate numbers and attempt to fix them. https://ebrukye.github.io/mobile-numbers-validation/
 
 **Technologies used;**
 - Laravel 5.7.27 as framework
