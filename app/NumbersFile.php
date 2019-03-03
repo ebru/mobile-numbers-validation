@@ -12,6 +12,7 @@ class NumbersFile extends Model
      * @var array
      */
     protected $fillable = [
-        'file_hash_name', 'original_file_path', 'modified_file_path', 'total_numbers_count', 'valid_numbers_count', 'corrected_numbers_count', 'not_valid_numbers_count',
+        'file_hash_name', 'original_file_path', 'modified_file_path', 'total_numbers_count', 
+        'valid_numbers_count', 'corrected_numbers_count', 'not_valid_numbers_count',
     ];
 }

@@ -6,7 +6,7 @@ A REST API application validates South African mobile numbers from a CSV file. I
 - Laravel 5.7.27 as framework
 - Composer for dependency management
 - MySQL 8.0.15 for database management
-- Laravel Excel for processing CSV files
+- Laravel Excel 3.1 for processing CSV files
 - Laravel Passport for authentication
 
 ## Installation
