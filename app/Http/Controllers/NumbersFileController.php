@@ -99,6 +99,7 @@ class NumbersFileController extends Controller
      */
     public function correctNumber(string $number): array
     {
+        // Check if country code is missing
         if (strlen($number) === 9) {
             $addedCountryCodeNumber = '27'.$number;
 
@@ -110,6 +111,7 @@ class NumbersFileController extends Controller
             }
         }
 
+        // Check if updated number is valid after eliminating the deleted part
         $parsedUpdatedNumber = explode("_", $number)[0];
 
         if ($this->validateNumber($parsedUpdatedNumber)) {
