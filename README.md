@@ -185,51 +185,49 @@ Returns the validation details of a single number.
 **Response**
 
 ```
+// valid & not modified value
 {
-   // valid & not modified value
-   {
-        "number": {
-            "value": "27831234567",
-            "details": {
-                "is_valid": true,
-                "is_modified": false,
-                "before_modified_value": null
-            }
+    "number": {
+        "value": "27831234567",
+        "details": {
+            "is_valid": true,
+            "is_modified": false,
+            "before_modified_value": null
         }
     }
+}
 
-   // valid & modified value
-   {
-        "number": {
-            "value": "27831234567",
-            "details": {
-                "is_valid": true,
-                "is_modified": true,
-                "before_modified_value": "831234567"
-            }
+// valid & modified value
+{
+    "number": {
+        "value": "27831234567",
+        "details": {
+            "is_valid": true,
+            "is_modified": true,
+            "before_modified_value": "831234567"
         }
     }
+}
 
-    {
-        "number": {
-            "value": "27831234567",
-            "details": {
-                "is_valid": true,
-                "is_modified": true,
-                "before_modified_value": "27831234567_DELETED"
-            }
+{
+    "number": {
+        "value": "27831234567",
+        "details": {
+            "is_valid": true,
+            "is_modified": true,
+            "before_modified_value": "27831234567_DELETED"
         }
     }
+}
 
-   // not valid value
-   {
-        "number": {
-            "value": "9983123456",
-            "details": {
-                "is_valid": false,
-                "is_modified": false,
-                "before_modified_value": null
-            }
+// not valid value
+{
+    "number": {
+        "value": "9983123456",
+        "details": {
+            "is_valid": false,
+            "is_modified": false,
+            "before_modified_value": null
         }
     }
 }
