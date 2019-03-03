@@ -41,23 +41,23 @@ class BaseController extends Controller
             }
         }
 
-        // Check if updated number is valid after eliminating the deleted part
-        $parsedUpdatedNumber = explode("_DELETE", $number)[0];
+        // Check if parsed updated number is valid after eliminating the deleted part
+        $parsedNumber = explode("_DELETE", $number)[0];
 
-        if ($this->validateNumber($parsedUpdatedNumber)) {
+        if ($this->validateNumber($parsedNumber)) {
             return [
                 'is_corrected' => true,
-                'modified_number' => $parsedUpdatedNumber
+                'modified_number' => $parsedNumber
             ];
         }
 
         // Check if updated number is valid with country code added
-        $addedCountryCodeParsedUpdatedNumber = '27'.$parsedUpdatedNumber;
+        $addedCountryCodeParsedNumber = '27'.$parsedNumber;
 
-        if ($this->validateNumber($addedCountryCodeParsedUpdatedNumber)) {
+        if ($this->validateNumber($addedCountryCodeParsedNumber)) {
             return [
                 'is_corrected' => true,
-                'modified_number' => $addedCountryCodeParsedUpdatedNumber
+                'modified_number' => $addedCountryCodeParsedNumber
             ];
         }
 
