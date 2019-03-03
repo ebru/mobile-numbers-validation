@@ -35,11 +35,47 @@ class NumbersFileController extends Controller
             
         $numbersArr = Excel::toArray(new NumbersFileImport, $uploadedFile)[0];
 
+        $parsedFileDetails = $this->parseFile($uploadedFile);
+
+        $originalPath = $this->saveUploadedFile($uploadedFile, $fileName, 'original');
+        $modifiedPath = $this->storeExportFile($fileName, 'modified');
+
+        $numbersFile = new NumbersFile();
+
+        $numbersFile->file_hash_name = $fileHashName;
+        $numbersFile->original_file_path = $originalPath;
+        $numbersFile->modified_file_path = $modifiedPath;
+        $numbersFile->total_numbers_count = $parsedFileDetails['total_numbers_count'];
+        $numbersFile->valid_numbers_count = $parsedFileDetails['valid_numbers_count'];
+        $numbersFile->corrected_numbers_count = $parsedFileDetails['corrected_numbers_count'];
+        $numbersFile->not_valid_numbers_count = $parsedFileDetails['not_valid_numbers_count'];
+
+        try {
+            $numbersFile->save();
+            $numbersFile->file_id = $this->getFileByHashName($fileHashName)->file_id;
+
+            return new NumbersFileResource($numbersFile);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'The file process could not be saved in database.'])
+                ->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Parse numbers data from uploaded file
+     *
+     * @param \Illuminate\Http\UploadedFile $file
+     * @return array
+     */
+    public function parseFile(\Illuminate\Http\UploadedFile $file): array
+    {
+        $data = Excel::toArray(new NumbersFileImport, $file)[0];
+
         $validNumbersCount = 0;
         $correctedNumbersCount = 0;
         $notValidNumbersCount = 0;
 
-        foreach ($numbersArr as $row) {
+        foreach ($data as $row) {
             $number = new Number();
             $numberStr = (string) $row['sms_phone'];
 
@@ -68,36 +104,15 @@ class NumbersFileController extends Controller
                 $notValidNumbersCount++;
             }
 
-            try {
-                $number->save();
-            } catch (\Exception $e) {
-                return response()->json(['error' => 'The file contains duplicated number ids.'])
-                    ->setStatusCode(Response::HTTP_BAD_REQUEST);
-            }
+            $number->save();
         }
 
-        $originalPath = $this->saveUploadedFile($uploadedFile, $fileName, 'original');
-        $modifiedPath = $this->storeExportFile($fileName, 'modified');
-
-        $numbersFile = new NumbersFile();
-
-        $numbersFile->file_hash_name = $fileHashName;
-        $numbersFile->original_file_path = $originalPath;
-        $numbersFile->modified_file_path = $modifiedPath;
-        $numbersFile->total_numbers_count = count($numbersArr);
-        $numbersFile->valid_numbers_count = $validNumbersCount;
-        $numbersFile->corrected_numbers_count = $correctedNumbersCount;
-        $numbersFile->not_valid_numbers_count = $notValidNumbersCount;
-
-        try {
-            $numbersFile->save();
-            $numbersFile->file_id = $this->getFileByHashName($fileHashName)->file_id;
-
-            return new NumbersFileResource($numbersFile);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'The file process could not be saved in database.'])
-                ->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return [
+          'total_numbers_count' => count($data),
+          'valid_numbers_count' => $validNumbersCount,
+          'corrected_numbers_count' => $correctedNumbersCount,
+          'not_valid_numbers_count' => $notValidNumbersCount
+        ];
     }
 
     /**
