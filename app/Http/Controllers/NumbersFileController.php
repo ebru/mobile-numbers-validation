@@ -14,11 +14,24 @@ use App\NumbersFile;
 use App\Http\Resources\NumbersFileResource;
 use Maatwebsite\Excel\Facades\Excel;
 use Storage;
+use Validator;
 
 class NumbersFileController extends Controller
 {
     public function process(Request $request)
     {
+        $rules = [
+            'numbers_file' => 'required|mimes:csv,txt'
+        ];
+    
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return [
+                'error' => $validator->errors()->first()
+            ];
+        }
+
         if ($request->hasFile('numbers_file')) {
             $extension = $request->file('numbers_file')->getClientOriginalExtension();
             $fileHashName = $request->file('numbers_file')->hashName();
