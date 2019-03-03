@@ -17,4 +17,5 @@ Route::post('register', 'PassportController@register');
 
 Route::middleware('auth:api')->group(function () {
     Route::post('files', 'NumbersFileController@process');
+    Route::get('files/{id}', 'NumbersFileController@get');
 });

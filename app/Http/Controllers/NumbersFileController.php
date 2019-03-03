@@ -18,6 +18,12 @@ use Validator;
 
 class NumbersFileController extends Controller
 {
+    /**
+     * Processing of the requested file
+     *
+     * @param Request $request
+     * @return Illuminate\\Http\\JsonResponse
+     */
     public function process(Request $request)
     {
         $validator = $this->validateRequest($request);
@@ -65,6 +71,36 @@ class NumbersFileController extends Controller
             return response()->json(['error' => 'The file process could not be saved in database.'])
                 ->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Get file details by file id
+     *
+     * @param Request $request
+     * @param integer $id
+     * @return Illuminate\\Http\\JsonResponse
+     */
+    public function get(Request $request, int $id)
+    {
+        $file = DB::table('numbers_files')->where('file_id', $id)->first();
+
+        if (!empty($file)) {
+            $numbersFile = new NumbersFile();
+
+            $numbersFile->file_id = $file->file_id;
+            $numbersFile->file_hash_name = $file->file_hash_name;
+            $numbersFile->original_file_path = $file->original_file_path;
+            $numbersFile->modified_file_path = $file->modified_file_path;
+            $numbersFile->total_numbers_count = $file->total_numbers_count;
+            $numbersFile->valid_numbers_count = $file->valid_numbers_count;
+            $numbersFile->corrected_numbers_count =  $file->corrected_numbers_count;
+            $numbersFile->not_valid_numbers_count = $file->not_valid_numbers_count;
+
+            return new NumbersFileResource($numbersFile);
+        }
+
+        return response()->json(['error' => 'There is no file with this id.'])
+            ->setStatusCode(Response::HTTP_BAD_REQUEST);
     }
 
     /**
