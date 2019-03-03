@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Number;
+use App\Http\Resources\NumberResource;
 
 class NumberController extends BaseController
 {
@@ -34,16 +35,6 @@ class NumberController extends BaseController
             $number->is_modified = false;
         }
 
-        $response = [
-            'number' => [
-                'value' => $number->number_value,
-                'is_valid' => $number->is_valid,
-                'is_modified' => $number->is_modified,
-                'before_modified_value' => $number->before_modified_value
-            ]
-        ];
-
-        return response()->json($response)
-            ->setStatusCode(Response::HTTP_OK);
+        return new NumberResource($number);
     }
 }
