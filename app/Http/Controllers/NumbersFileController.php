@@ -36,7 +36,12 @@ class NumbersFileController extends Controller
                     ->setStatusCode(Response::HTTP_BAD_REQUEST);
             }
 
-            $number->save();
+            try {
+                $number->save();
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'The number could not be saved in database.'])
+                    ->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
         }
 
         $storedFileDetails = $this->storeFiles($request->file('numbers_file'));
