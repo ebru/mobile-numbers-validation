@@ -17,9 +17,11 @@ class NumberResource extends JsonResource
         return [
             'number' => [
                 'value' => $this->number_value,
-                'is_valid' => $this->is_valid,
-                'is_modified' => $this->is_modified,
-                'before_modified_value' => $this->before_modified_value
+                'details' => [
+                    'is_valid' => $this->is_valid,
+                    'is_modified' => $this->is_modified,
+                    'before_modified_value' => $this->before_modified_value
+                ]
             ]
         ];
     }
