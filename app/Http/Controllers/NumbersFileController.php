@@ -32,9 +32,7 @@ class NumbersFileController extends Controller
         $extension = $uploadedFile->getClientOriginalExtension();
         $fileHashName = explode('.', $uploadedFile->hashName())[0];
         $fileName = $fileHashName.'.'.$extension;
-            
-        $numbersArr = Excel::toArray(new NumbersFileImport, $uploadedFile)[0];
-
+        
         $parsedFileDetails = $this->parseFile($uploadedFile);
 
         $originalPath = $this->saveUploadedFile($uploadedFile, $fileName, 'original');
