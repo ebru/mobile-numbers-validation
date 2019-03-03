@@ -28,19 +28,18 @@ class NumbersFileController extends Controller
             ];
         }
 
-        $extension = $request->file('numbers_file')->getClientOriginalExtension();
-        $fileHashName = $request->file('numbers_file')->hashName();
-        $fileName = explode('.', $fileHashName)[0].'.'.$extension;
-
-        $originalPath = $this->saveUploadedFile($request->file('numbers_file'), $fileName, 'original');
+        $uploadedFile = $request->file('numbers_file');
+        $extension = $uploadedFile->getClientOriginalExtension();
+        $fileHashName = explode('.', $uploadedFile->hashName())[0];
+        $fileName = $fileHashName.'.'.$extension;
             
-        $array = Excel::toArray(new NumbersFileImport, request()->file('numbers_file'));
+        $data = Excel::toArray(new NumbersFileImport, $uploadedFile);
 
         $validNumbersCount = 0;
         $correctedNumbersCount = 0;
         $notValidNumbersCount = 0;
 
-        foreach ($array[0] as $row) {
+        foreach ($data[0] as $row) {
             $number = new Number();
 
             $number->number_id = $row['id'];
@@ -71,20 +70,21 @@ class NumbersFileController extends Controller
             $number->save();
         }
 
+        $originalPath = $this->saveUploadedFile($uploadedFile, $fileName, 'original');
         $modifiedPath = $this->storeExportFile($fileName, 'modified');
 
         $numbersFile = new NumbersFile();
 
-        $numbersFile->file_hash_name = explode('.', $fileHashName)[0];
+        $numbersFile->file_hash_name = $fileHashName;
         $numbersFile->original_file_path = $originalPath;
         $numbersFile->modified_file_path = $modifiedPath;
-        $numbersFile->total_numbers_count = count($array[0]);
+        $numbersFile->total_numbers_count = count($data[0]);
         $numbersFile->valid_numbers_count = $validNumbersCount;
         $numbersFile->corrected_numbers_count = $correctedNumbersCount;
         $numbersFile->not_valid_numbers_count = $notValidNumbersCount;
 
         if ($numbersFile->save()) {
-            $file = DB::table('numbers_files')->where('file_hash_name', explode('.', $fileHashName)[0])->first();
+            $file = DB::table('numbers_files')->where('file_hash_name', $fileHashName)->first();
             $numbersFile->file_id = $file->file_id;
 
             return new NumbersFileResource($numbersFile);
