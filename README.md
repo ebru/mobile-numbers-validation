@@ -65,6 +65,7 @@ http://localhost:8000/api
 
 **Sample CSV File:**
 You can find a sample file contains some South African mobile numbers in path below.
+
 `/public/assets/sample_mobile_numbers.csv`
 
 ## **1. create api token**
