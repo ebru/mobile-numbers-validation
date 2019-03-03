@@ -182,7 +182,7 @@ Returns the validation details of a single number.
 
 * **mobile_number** is required.
 
-**Response**
+**Responses**
 
 ```
 // valid & not modified value
