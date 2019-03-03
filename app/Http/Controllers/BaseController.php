@@ -14,7 +14,7 @@ class BaseController extends Controller
      */
     public function validateNumber(string $number): bool
     {
-        if (preg_match('/^(\+?27|0)[6-8][0-9]{8}$/', $number) === 1) {
+        if (preg_match('/^(\+?27)[6-8][0-9]{8}$/', $number) === 1) {
             return true;
         }
 
@@ -42,12 +42,22 @@ class BaseController extends Controller
         }
 
         // Check if updated number is valid after eliminating the deleted part
-        $parsedUpdatedNumber = explode("_DELETED", $number)[0];
+        $parsedUpdatedNumber = explode("_", $number)[0];
 
         if ($this->validateNumber($parsedUpdatedNumber)) {
             return [
                 'is_corrected' => true,
                 'modified_number' => $parsedUpdatedNumber
+            ];
+        }
+
+        // Check if updated number is valid with country code added
+        $addedCountryCodeParsedUpdatedNumber = '27'.$parsedUpdatedNumber;
+
+        if ($this->validateNumber($addedCountryCodeParsedUpdatedNumber)) {
+            return [
+                'is_corrected' => true,
+                'modified_number' => $addedCountryCodeParsedUpdatedNumber
             ];
         }
 

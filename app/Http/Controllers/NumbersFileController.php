@@ -140,9 +140,9 @@ class NumbersFileController extends BaseController
         $numbers = [];
 
         foreach ($data as $row) {
-            $number = new Number();
             $numberStr = (string) $row['sms_phone'];
 
+            $number = new Number();
             $number->number_id = $row['id'];
             $number->number_value = $row['sms_phone'];
                     
