@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use App\Imports\NumbersFileImport;
 use App\Exports\NumbersFileExport;
 use App\Number;
@@ -29,6 +30,10 @@ class NumbersFileController extends Controller
             
             $array = Excel::toArray(new NumbersFileImport, request()->file('numbers_file'));
 
+            $validNumbersCount = 0;
+            $correctedNumbersCount = 0;
+            $notValidNumbersCount = 0;
+
             foreach ($array[0] as $row) {
                 $number = new Number();
 
@@ -38,6 +43,8 @@ class NumbersFileController extends Controller
                 if ($this->validateNumber((string) $row['sms_phone'])) {
                     $number->is_valid = true;
                     $number->is_modified = false;
+
+                    $validNumbersCount++;
                 } elseif ($this->correctNumber((string) $row['sms_phone'])['is_corrected']) {
                     $modifiedDetails = $this->correctNumber((string) $row['sms_phone']);
 
@@ -45,9 +52,14 @@ class NumbersFileController extends Controller
                     $number->is_valid = true;
                     $number->is_modified = true;
                     $number->before_modified_value = $row['sms_phone'];
+
+                    $validNumbersCount++;
+                    $correctedNumbersCount++;
                 } else {
                     $number->is_valid = false;
                     $number->is_modified = false;
+
+                    $notValidNumbersCount++;
                 }
 
                 $number->save();
@@ -62,12 +74,15 @@ class NumbersFileController extends Controller
             $numbersFile->file_hash_name = explode('.', $fileHashName)[0];
             $numbersFile->original_file_path = $originalPath;
             $numbersFile->modified_file_path = $modifiedPath;
-            $numbersFile->total_numbers_count = 2;
-            $numbersFile->valid_numbers_count = 2;
-            $numbersFile->corrected_numbers_count = 2;
-            $numbersFile->not_valid_numbers_count = 2;
+            $numbersFile->total_numbers_count = count($array[0]);
+            $numbersFile->valid_numbers_count = $validNumbersCount;
+            $numbersFile->corrected_numbers_count = $correctedNumbersCount;
+            $numbersFile->not_valid_numbers_count = $notValidNumbersCount;
 
             if ($numbersFile->save()) {
+                $file = DB::table('numbers_files')->where('file_hash_name', explode('.', $fileHashName)[0])->first();
+                $numbersFile->file_id = $file->file_id;
+
                 return new NumbersFileResource($numbersFile);
             }
         }
