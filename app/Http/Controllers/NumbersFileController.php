@@ -172,20 +172,4 @@ class NumbersFileController extends Controller
 
         return Storage::url("files/{$directory}/{$fileName}");
     }
-
-    public function putFile($path, $file, $options = [])
-    {
-        return $this->putFileAs($path, $file, $file->hashName(), $options);
-    }
-
-    public function hashName($path = null)
-    {
-        if ($path) {
-            $path = rtrim($path, '/').'/';
-        }
-
-        $hash = $this->hashName ?: $this->hashName = Str::random(40);
-
-        return $path.$hash.'.'.$this->guessExtension();
-    }
 }
