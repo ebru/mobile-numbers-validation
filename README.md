@@ -60,13 +60,13 @@ With the link below, you can directly import a test environment with endpoints p
 
 `https://www.getpostman.com/collections/544b84d18057569e1d0e`
 
-**Base URL:**
-http://localhost:8000/api
-
 **Sample CSV File:**
 You can find a sample file contains some South African mobile numbers in path below.
 
 `/public/assets/sample_mobile_numbers.csv`
+
+**Base URL:**
+http://localhost:8000/api
 
 ## **1. create api token**
 Returns an api token to send authenticated requests while registering the user.
