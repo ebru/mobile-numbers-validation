@@ -95,29 +95,37 @@ class NumbersFileController extends Controller
         }
     }
 
+    /**
+     * Attempts to correct number format to validate
+     *
+     * @param string $number
+     * @return array
+     */
     public function correctNumber(string $number): array
     {
-        $isCorrected = false;
-        $modifiedNumber = null;
-
         if (strlen($number) === 9) {
             $addedCountryCodeNumber = '27'.$number;
+
             if ($this->validateNumber($addedCountryCodeNumber)) {
-                $isCorrected = true;
-                $modifiedNumber = $addedCountryCodeNumber;
+                return [
+                    'is_corrected' => true,
+                    'modified_number' => $addedCountryCodeNumber
+                ];
             }
         }
 
-        if ($this->validateNumber(explode("_", $number)[0])) {
-            $updatedNumber = explode("_", $number)[0];
-            
-            $isCorrected = true;
-            $modifiedNumber = $updatedNumber;
+        $parsedUpdatedNumber = explode("_", $number)[0];
+
+        if ($this->validateNumber($parsedUpdatedNumber)) {
+            return [
+                'is_corrected' => true,
+                'modified_number' => $parsedUpdatedNumber
+            ];
         }
 
         return [
-            'is_corrected' => $isCorrected,
-            'modified_number' => $modifiedNumber
+            'is_corrected' => false,
+            'modified_number' => null
         ];
     }
 
