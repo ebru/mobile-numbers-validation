@@ -67,7 +67,12 @@ class NumbersFileController extends Controller
                 $notValidNumbersCount++;
             }
 
-            $number->save();
+            try {
+                $number->save();
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'The file contains duplicated number ids.'])
+                    ->setStatusCode(Response::HTTP_BAD_REQUEST);
+            }
         }
 
         $originalPath = $this->saveUploadedFile($uploadedFile, $fileName, 'original');
@@ -83,11 +88,16 @@ class NumbersFileController extends Controller
         $numbersFile->corrected_numbers_count = $correctedNumbersCount;
         $numbersFile->not_valid_numbers_count = $notValidNumbersCount;
 
-        if ($numbersFile->save()) {
+        try {
+            $numbersFile->save();
+
             $file = DB::table('numbers_files')->where('file_hash_name', $fileHashName)->first();
             $numbersFile->file_id = $file->file_id;
 
             return new NumbersFileResource($numbersFile);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'The file process could not be saved in database.'])
+                ->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
