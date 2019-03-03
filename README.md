@@ -61,7 +61,7 @@ With the link below, you can directly import a test environment with endpoints p
 `https://www.getpostman.com/collections/544b84d18057569e1d0e`
 
 **Sample CSV File:**
-You can find a sample file contains some South African mobile numbers in path below.
+You can find a sample file contains some South African mobile numbers in directory below.
 
 `/public/assets/sample_mobile_numbers.csv`
 
