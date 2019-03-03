@@ -28,12 +28,7 @@ class NumbersFileController extends Controller
             ];
         }
 
-        $uploadedFile = $request->file('numbers_file');
-        $extension = $uploadedFile->getClientOriginalExtension();
-        $fileHashName = explode('.', $uploadedFile->hashName())[0];
-        $fileName = $fileHashName.'.'.$extension;
-
-        $parsedFileDetails = $this->parseFile($uploadedFile);
+        $parsedFileDetails = $this->parseFile($request->file('numbers_file'));
 
         foreach ($parsedFileDetails['numbers'] as $number) {
             if ($this->getNumberById($number->number_id)) {
@@ -44,14 +39,13 @@ class NumbersFileController extends Controller
             $number->save();
         }
 
-        $originalPath = $this->saveUploadedFile($uploadedFile, $fileName, 'original');
-        $modifiedPath = $this->storeExportFile($fileName, 'modified');
+        $storedFileDetails = $this->storeFiles($request->file('numbers_file'));
 
         $numbersFile = new NumbersFile();
 
-        $numbersFile->file_hash_name = $fileHashName;
-        $numbersFile->original_file_path = $originalPath;
-        $numbersFile->modified_file_path = $modifiedPath;
+        $numbersFile->file_hash_name = $storedFileDetails['file_hash_name'];
+        $numbersFile->original_file_path = $storedFileDetails['original_file_path'];
+        $numbersFile->modified_file_path = $storedFileDetails['modified_file_path'];
         $numbersFile->total_numbers_count = $parsedFileDetails['counts']['total_numbers'];
         $numbersFile->valid_numbers_count = $parsedFileDetails['counts']['valid_numbers'];
         $numbersFile->corrected_numbers_count = $parsedFileDetails['counts']['corrected_numbers'];
@@ -59,13 +53,33 @@ class NumbersFileController extends Controller
 
         try {
             $numbersFile->save();
-            $numbersFile->file_id = $this->getFileByHashName($fileHashName)->file_id;
+            $numbersFile->file_id = $this->getFileByHashName($storedFileDetails['file_hash_name'])->file_id;
 
             return new NumbersFileResource($numbersFile);
         } catch (\Exception $e) {
             return response()->json(['error' => 'The file process could not be saved in database.'])
                 ->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Store the original and modified versions of the file requested
+     *
+     * @param \Illuminate\Http\UploadedFile $file
+     * @param string $fileName
+     * @return array
+     */
+    public function storeFiles(\Illuminate\Http\UploadedFile $file): array
+    {
+        $extension = $file->getClientOriginalExtension();
+        $fileHashName = explode('.', $file->hashName())[0];
+        $fileName = $fileHashName.'.'.$extension;
+        
+        return [
+            'file_hash_name' => $fileHashName,
+            'original_file_path' => $this->saveUploadedFile($file, $fileName, 'original'),
+            'modified_file_path' => $this->storeExportFile($fileName, 'modified')
+        ];
     }
 
     /**
