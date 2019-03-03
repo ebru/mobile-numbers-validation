@@ -20,12 +20,8 @@ class NumbersFileController extends Controller
 {
     public function process(Request $request)
     {
-        $rules = [
-            'numbers_file' => 'required|mimes:csv,txt'
-        ];
-    
-        $validator = Validator::make($request->all(), $rules);
-
+        $validator = $this->validateRequest($request);
+        
         if ($validator->fails()) {
             return [
                 'error' => $validator->errors()->first()
@@ -171,5 +167,16 @@ class NumbersFileController extends Controller
         Excel::store(new NumbersFileExport(), "files/{$directory}/{$fileName}", 'public');
 
         return Storage::url("files/{$directory}/{$fileName}");
+    }
+
+    public function validateRequest(Request $request)
+    {
+        $rules = [
+            'numbers_file' => 'required|mimes:csv,txt'
+        ];
+    
+        $validator = Validator::make($request->all(), $rules);
+
+        return $validator;
     }
 }
