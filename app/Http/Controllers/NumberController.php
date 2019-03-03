@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Number;
 use App\Http\Resources\NumberResource;
+use Validator;
 
 class NumberController extends BaseController
 {
@@ -17,6 +18,14 @@ class NumberController extends BaseController
      */
     public function process(Request $request)
     {
+        $validator = $this->validateRequest($request);
+        
+        if ($validator->fails()) {
+            return [
+                'error' => $validator->errors()->first()
+            ];
+        }
+
         $number = new Number();
         $number->number_value = $request->input('mobile_number');
 
@@ -36,5 +45,22 @@ class NumberController extends BaseController
         }
 
         return new NumberResource($number);
+    }
+
+    /**
+     * Validate the request
+     *
+     * @param Request $request
+     * @return Validator
+     */
+    public function validateRequest(Request $request)
+    {
+        $rules = [
+            'mobile_number' => 'required'
+        ];
+    
+        $validator = Validator::make($request->all(), $rules);
+
+        return $validator;
     }
 }
