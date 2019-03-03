@@ -20,8 +20,8 @@ class NumbersFileController extends Controller
     {
         if ($request->hasFile('numbers_file')) {
             $extension = $request->file('numbers_file')->getClientOriginalExtension();
-            $fileId = uniqid();
-            $fileName = $fileId.'.'.$extension;
+            $fileHashName = $request->file('numbers_file')->hashName();
+            $fileName = explode('.', $fileHashName)[0].'.'.$extension;
 
             Storage::disk('public')->putFileAs('files/original', $request->file('numbers_file'), $fileName);
 
@@ -59,7 +59,7 @@ class NumbersFileController extends Controller
 
             $numbersFile = new NumbersFile();
 
-            $numbersFile->file_id = (int) $fileId;
+            $numbersFile->file_hash_name = explode('.', $fileHashName)[0];
             $numbersFile->original_file_path = $originalPath;
             $numbersFile->modified_file_path = $modifiedPath;
             $numbersFile->total_numbers_count = 2;

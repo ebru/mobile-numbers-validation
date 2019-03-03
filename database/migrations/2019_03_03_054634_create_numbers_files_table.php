@@ -14,7 +14,8 @@ class CreateNumbersFilesTable extends Migration
     public function up()
     {
         Schema::create('numbers_files', function (Blueprint $table) {
-            $table->integer('file_id')->unique();
+            $table->bigIncrements('file_id');
+            $table->string('file_hash_name')->unique();
             $table->string('original_file_path');
             $table->string('modified_file_path');
             $table->integer('total_numbers_count');

@@ -16,7 +16,7 @@ class NumbersFileResource extends JsonResource
     {
         return [
             'file' => [
-                'id' => $this->file_id,
+                'hash_name' => $this->file_hash_name,
                 'original_path' => $this->original_file_path,
                 'modified_path' => $this->modified_file_path,
                 'details' => [
