@@ -32,8 +32,17 @@ class NumbersFileController extends Controller
         $extension = $uploadedFile->getClientOriginalExtension();
         $fileHashName = explode('.', $uploadedFile->hashName())[0];
         $fileName = $fileHashName.'.'.$extension;
-        
+
         $parsedFileDetails = $this->parseFile($uploadedFile);
+
+        foreach ($parsedFileDetails['numbers'] as $number) {
+            try {
+                $number->save();
+            } catch (\Exception $e) {
+                return response()->json(['error' => 'The file contains duplicated number ids.'])
+                    ->setStatusCode(Response::HTTP_BAD_REQUEST);
+            }
+        }
 
         $originalPath = $this->saveUploadedFile($uploadedFile, $fileName, 'original');
         $modifiedPath = $this->storeExportFile($fileName, 'modified');
@@ -43,10 +52,10 @@ class NumbersFileController extends Controller
         $numbersFile->file_hash_name = $fileHashName;
         $numbersFile->original_file_path = $originalPath;
         $numbersFile->modified_file_path = $modifiedPath;
-        $numbersFile->total_numbers_count = $parsedFileDetails['total_numbers_count'];
-        $numbersFile->valid_numbers_count = $parsedFileDetails['valid_numbers_count'];
-        $numbersFile->corrected_numbers_count = $parsedFileDetails['corrected_numbers_count'];
-        $numbersFile->not_valid_numbers_count = $parsedFileDetails['not_valid_numbers_count'];
+        $numbersFile->total_numbers_count = $parsedFileDetails['counts']['total_numbers'];
+        $numbersFile->valid_numbers_count = $parsedFileDetails['counts']['valid_numbers'];
+        $numbersFile->corrected_numbers_count = $parsedFileDetails['counts']['corrected_numbers'];
+        $numbersFile->not_valid_numbers_count = $parsedFileDetails['counts']['not_valid_numbers'];
 
         try {
             $numbersFile->save();
@@ -72,6 +81,8 @@ class NumbersFileController extends Controller
         $validNumbersCount = 0;
         $correctedNumbersCount = 0;
         $notValidNumbersCount = 0;
+
+        $numbers = [];
 
         foreach ($data as $row) {
             $number = new Number();
@@ -102,14 +113,17 @@ class NumbersFileController extends Controller
                 $notValidNumbersCount++;
             }
 
-            $number->save();
+            array_push($numbers, $number);
         }
 
         return [
-          'total_numbers_count' => count($data),
-          'valid_numbers_count' => $validNumbersCount,
-          'corrected_numbers_count' => $correctedNumbersCount,
-          'not_valid_numbers_count' => $notValidNumbersCount
+            'numbers' => $numbers,
+            'counts' => [
+                'total_numbers' => count($data),
+                'valid_numbers' => $validNumbersCount,
+                'corrected_numbers' => $correctedNumbersCount,
+                'not_valid_numbers' => $notValidNumbersCount
+            ]
         ];
     }
 
