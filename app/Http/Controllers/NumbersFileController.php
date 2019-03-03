@@ -32,72 +32,66 @@ class NumbersFileController extends Controller
             ];
         }
 
-        if ($request->hasFile('numbers_file')) {
-            $extension = $request->file('numbers_file')->getClientOriginalExtension();
-            $fileHashName = $request->file('numbers_file')->hashName();
-            $fileName = explode('.', $fileHashName)[0].'.'.$extension;
+        $extension = $request->file('numbers_file')->getClientOriginalExtension();
+        $fileHashName = $request->file('numbers_file')->hashName();
+        $fileName = explode('.', $fileHashName)[0].'.'.$extension;
 
-            Storage::disk('public')->putFileAs('files/original', $request->file('numbers_file'), $fileName);
-
-            $originalPath = Storage::url("files/original/{$fileName}");
+        $originalPath = $this->saveUploadedFile($request->file('numbers_file'), $fileName, 'original');
             
-            $array = Excel::toArray(new NumbersFileImport, request()->file('numbers_file'));
+        $array = Excel::toArray(new NumbersFileImport, request()->file('numbers_file'));
 
-            $validNumbersCount = 0;
-            $correctedNumbersCount = 0;
-            $notValidNumbersCount = 0;
+        $validNumbersCount = 0;
+        $correctedNumbersCount = 0;
+        $notValidNumbersCount = 0;
 
-            foreach ($array[0] as $row) {
-                $number = new Number();
+        foreach ($array[0] as $row) {
+            $number = new Number();
 
-                $number->number_id = $row['id'];
-                $number->number_value = $row['sms_phone'];
+            $number->number_id = $row['id'];
+            $number->number_value = $row['sms_phone'];
                     
-                if ($this->validateNumber((string) $row['sms_phone'])) {
-                    $number->is_valid = true;
-                    $number->is_modified = false;
+            if ($this->validateNumber((string) $row['sms_phone'])) {
+                $number->is_valid = true;
+                $number->is_modified = false;
 
-                    $validNumbersCount++;
-                } elseif ($this->correctNumber((string) $row['sms_phone'])['is_corrected']) {
-                    $modifiedDetails = $this->correctNumber((string) $row['sms_phone']);
+                $validNumbersCount++;
+            } elseif ($this->correctNumber((string) $row['sms_phone'])['is_corrected']) {
+                $modifiedDetails = $this->correctNumber((string) $row['sms_phone']);
 
-                    $number->number_value = $modifiedDetails['modified_number'];
-                    $number->is_valid = true;
-                    $number->is_modified = true;
-                    $number->before_modified_value = $row['sms_phone'];
+                $number->number_value = $modifiedDetails['modified_number'];
+                $number->is_valid = true;
+                $number->is_modified = true;
+                $number->before_modified_value = $row['sms_phone'];
 
-                    $validNumbersCount++;
-                    $correctedNumbersCount++;
-                } else {
-                    $number->is_valid = false;
-                    $number->is_modified = false;
+                $validNumbersCount++;
+                $correctedNumbersCount++;
+            } else {
+                $number->is_valid = false;
+                $number->is_modified = false;
 
-                    $notValidNumbersCount++;
-                }
-
-                $number->save();
+                $notValidNumbersCount++;
             }
-            
-            Excel::store(new NumbersFileExport(), "files/modified/{$fileName}", 'public');
 
-            $modifiedPath = Storage::url("files/modified/{$fileName}");
+            $number->save();
+        }
 
-            $numbersFile = new NumbersFile();
+        $modifiedPath = $this->storeExportFile($fileName, 'modified');
 
-            $numbersFile->file_hash_name = explode('.', $fileHashName)[0];
-            $numbersFile->original_file_path = $originalPath;
-            $numbersFile->modified_file_path = $modifiedPath;
-            $numbersFile->total_numbers_count = count($array[0]);
-            $numbersFile->valid_numbers_count = $validNumbersCount;
-            $numbersFile->corrected_numbers_count = $correctedNumbersCount;
-            $numbersFile->not_valid_numbers_count = $notValidNumbersCount;
+        $numbersFile = new NumbersFile();
 
-            if ($numbersFile->save()) {
-                $file = DB::table('numbers_files')->where('file_hash_name', explode('.', $fileHashName)[0])->first();
-                $numbersFile->file_id = $file->file_id;
+        $numbersFile->file_hash_name = explode('.', $fileHashName)[0];
+        $numbersFile->original_file_path = $originalPath;
+        $numbersFile->modified_file_path = $modifiedPath;
+        $numbersFile->total_numbers_count = count($array[0]);
+        $numbersFile->valid_numbers_count = $validNumbersCount;
+        $numbersFile->corrected_numbers_count = $correctedNumbersCount;
+        $numbersFile->not_valid_numbers_count = $notValidNumbersCount;
 
-                return new NumbersFileResource($numbersFile);
-            }
+        if ($numbersFile->save()) {
+            $file = DB::table('numbers_files')->where('file_hash_name', explode('.', $fileHashName)[0])->first();
+            $numbersFile->file_id = $file->file_id;
+
+            return new NumbersFileResource($numbersFile);
         }
     }
 
@@ -127,6 +121,12 @@ class NumbersFileController extends Controller
         ];
     }
 
+    /**
+     * Validates the number if it is formatted correctly for South America
+     *
+     * @param string $number
+     * @return boolean
+     */
     public function validateNumber(string $number): bool
     {
         if (preg_match('/^(\+?27|0)[6-8][0-9]{8}$/', $number) === 1) {
@@ -134,6 +134,35 @@ class NumbersFileController extends Controller
         }
 
         return false;
+    }
+
+    /**
+     * Save file to public storage
+     *
+     * @param \Illuminate\Http\UploadedFile $file
+     * @param string $fileName
+     * @param string $directory
+     * @return string
+     */
+    public function saveUploadedFile(\Illuminate\Http\UploadedFile $file, string $fileName, string $directory): string
+    {
+        Storage::disk('public')->putFileAs("files/{$directory}", $file, $fileName);
+
+        return Storage::url("files/{$directory}/{$fileName}");
+    }
+
+    /**
+     * Stores the export file to public storage
+     *
+     * @param string $fileName
+     * @param string $directory
+     * @return string
+     */
+    public function storeExportFile(string $fileName, string $directory): string
+    {
+        Excel::store(new NumbersFileExport(), "files/{$directory}/{$fileName}", 'public');
+
+        return Storage::url("files/{$directory}/{$fileName}");
     }
 
     public function putFile($path, $file, $options = [])
