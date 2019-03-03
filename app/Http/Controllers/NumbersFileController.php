@@ -11,6 +11,8 @@ use App\Exports\NumbersFileExport;
 use App\Number;
 use Maatwebsite\Excel\Facades\Excel;
 use Storage;
+use App\NumbersFile;
+use App\Http\Resources\NumbersFileResource;
 
 class NumbersFileController extends Controller
 {
@@ -55,23 +57,19 @@ class NumbersFileController extends Controller
 
             $modifiedPath = Storage::url("files/modified/{$fileName}");
 
-            $response = [
-                'file' => [
-                    'id' => $fileId,
-                    'original_path' => $originalPath,
-                    'modified_path' => $modifiedPath,
-                    'details' => [
-                        'count' => [
-                            'total_numbers' => 'test',
-                            'valid_numbers' => 'test',
-                            'not_valid_numbers' => 'test'
-                        ]
-                    ]
-                ]
-            ];
+            $numbersFile = new NumbersFile();
 
-            return response()->json($response)
-                ->setStatusCode(Response::HTTP_OK);
+            $numbersFile->file_id = (int) $fileId;
+            $numbersFile->original_file_path = $originalPath;
+            $numbersFile->modified_file_path = $modifiedPath;
+            $numbersFile->total_numbers_count = 2;
+            $numbersFile->valid_numbers_count = 2;
+            $numbersFile->corrected_numbers_count = 2;
+            $numbersFile->not_valid_numbers_count = 2;
+
+            if ($numbersFile->save()) {
+                return new NumbersFileResource($numbersFile);
+            }
         }
     }
 
